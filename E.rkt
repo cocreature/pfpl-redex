@@ -91,12 +91,24 @@
    (--> (let V x e)
         (substitute e x V))))
 
+(define -->r
+  (context-closure red E+Γ+C E))
+
 (module+ test
-  (test-->> (context-closure red E+Γ+C E) (term (plus (plus 1 2) 3)) 6)
-  (test-->> (context-closure red E+Γ+C E) (term (plus 1 (plus 2 3))) 6)
-  (test-->> (context-closure red E+Γ+C E) (term (cat "abc" "def")) "abcdef")
-  (test-->> (context-closure red E+Γ+C E) (term (let 1 x (plus 1 x))) 2)
-  (test-->> (context-closure red E+Γ+C E) (term (let (plus 1 2) x (plus 3 x))) 6))
+  (test-->> -->r (term (plus (plus 1 2) 3)) 6)
+  (test-->> -->r (term (plus 1 (plus 2 3))) 6)
+  (test-->> -->r (term (cat "abc" "def")) "abcdef")
+  (test-->> -->r (term (let 1 x (plus 1 x))) 2)
+  (test-->> -->r (term (let (plus 1 2) x (plus 3 x))) 6))
+
+(define (uniquely-reduces? c)
+  (= 1 (length (apply-reduction-relation -->r c))))
+
+(define (unique-progress? c)
+  (or (redex-match? E+Γ+C e c)
+      (uniquely-reduces? c)))
+
+(redex-check E+Γ+C e (unique-progress? (term e)) #:attempts 10000)
 
 (module+ test
   (test-results))
