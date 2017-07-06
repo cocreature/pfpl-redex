@@ -15,12 +15,12 @@
          (s E)
          (ap E e)
          (ap v E)
-         (rec e0 (x_1 x_2 e_1) E))
+         (rec e_0 (x_!_ x_!_ e_1) E))
   (v ::= z
          (s v)
          (lam t x e))
   #:binding-forms
-
+  (rec e (x_1 x_2 e_1 #:refers-to (shadow x_2 x_1)))
   (lam t x e #:refers-to x))
 
 (define-metafunction T
@@ -44,7 +44,7 @@
   [(types Γ e nat)
    (types Γ e_0 t)
    (types (x_1 : nat (x_2 : t Γ)) e_1 t)
-   -----------------------------------
+   -------------------------------------
    (types Γ (rec e_0 (x_1 x_2 e_1) e) t)]
   [(types (x : t_1 Γ) e t_2)
    --------------------------------------
@@ -58,9 +58,9 @@
   (reduction-relation T
    (--> (in-hole E (ap (lam t x e) v_2))
         (in-hole E (substitute e x v_2)))
-   (--> (in-hole E (rec e_0 (x_1 x_2 e_1) z))
+   (--> (in-hole E (side-condition (rec e_0 (x_1 x_2 e_1) z) (term (different x_1 x_2))))
         (in-hole E e_0))
-   (--> (in-hole E (rec e_0 (x_1 x_2 e_1) (s v)))
+   (--> (in-hole E (side-condition (rec e_0 (x_1 x_2 e_1) (s v)) (term (different x_1 x_2))))
         (in-hole E (substitute (substitute e_1 x_1 v) x_2 (rec e_0 (x_1 x_2 e_1) v))))))
 
 (module+ test
@@ -85,7 +85,8 @@
       #t))
 
 (module+ test
-  (redex-check T e (progress-holds? (term e))))
+  (redex-check T e (progress-holds? (term e)))
+  (check-reduction-relation red (λ (e) (progress-holds? e))))
 
 (module+ test
   (test-results))
