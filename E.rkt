@@ -26,37 +26,45 @@
   [(different x_1 x_2) #t])
 
 (define-judgment-form E+Γ
-  #:mode (⊢ I I I O)
-  #:contract (⊢ Γ e : τ)
+  #:mode (types I I I I O)
+  #:contract (types Γ ⊢ e : τ)
   [-----------------
-   (⊢ (x : τ Γ) x : τ)]
-  [(⊢ Γ x_1 : τ_1)
+   (types (x : τ Γ) ⊢ x : τ)]
+
+  [(types Γ ⊢ x_1 : τ_1)
    (side-condition (different x_1 x_2))
    ------------------------------------
-   (⊢ (x_2 : τ_2 Γ) x_1 : τ_1)]
+   (types (x_2 : τ_2 Γ) ⊢ x_1 : τ_1)]
+
   [--------------------
-   (⊢ Γ string : str)]
+   (types Γ ⊢ string : str)]
+
   [--------------------
-   (⊢ Γ number : num)]
-  [(⊢ Γ e_1 : num)
-   (⊢ Γ e_2 : num)
+   (types Γ ⊢ number : num)]
+
+  [(types Γ ⊢ e_1 : num)
+   (types Γ ⊢ e_2 : num)
    --------------------------
-   (⊢ Γ (plus e_1 e_2) : num)]
-  [(⊢ Γ e_1 : num)
-   (⊢ Γ e_2 : num)
+   (types Γ ⊢ (plus e_1 e_2) : num)]
+
+  [(types Γ ⊢ e_1 : num)
+   (types Γ ⊢ e_2 : num)
    ---------------------------
-   (⊢ Γ (times e_1 e_2) : num)]
-  [(⊢ Γ e_1 : str)
-   (⊢ Γ e_2 : str)
+   (types Γ ⊢ (times e_1 e_2) : num)]
+
+  [(types Γ ⊢ e_1 : str)
+   (types Γ ⊢ e_2 : str)
    -------------------------
-   (⊢ Γ (cat e_1 e_2) : str)]
-  [(⊢ Γ e : str)
+   (types Γ ⊢ (cat e_1 e_2) : str)]
+
+  [(types Γ ⊢ e : str)
    ---------------------
-   (⊢ Γ (len e) : num)]
-  [(⊢ Γ e_1 : τ_1)
-   (⊢ (x : τ_1 Γ) e_2 : τ_2)
+   (types Γ ⊢ (len e) : num)]
+
+  [(types Γ ⊢ e_1 : τ_1)
+   (types (x : τ_1 Γ) ⊢ e_2 : τ_2)
    --------------------------
-   (⊢ Γ (let e_1 x e_2) : τ_2)])
+   (types Γ ⊢ (let e_1 x e_2) : τ_2)])
 
 (define-extended-language E+Γ+C E+Γ
   (E ::=
@@ -70,8 +78,8 @@
      N S))
 
 (module+ test
-  (test-equal (judgment-holds (⊢ · (plus 1 2) : τ) τ) '(num))
-  (test-equal (judgment-holds (⊢ · (let 1 x (let 2 y (plus x y))) : τ) τ) '(num)))
+  (test-equal (judgment-holds (types · ⊢ (plus 1 2) : τ) τ) '(num))
+  (test-equal (judgment-holds (types · ⊢ (let 1 x (let 2 y (plus x y))) : τ) τ) '(num)))
 
 (define red
   (reduction-relation
